@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\RegisterRequest;
+use App\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -14,7 +17,22 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    }
+
+    public function register(RegisterRequest $request)
+    {
+        $data = $request->all([
+            'name',
+            'email',
+            'password'
+        ]);
+
+        $pass = Hash::make($data['password']);
+
+        $user = User::create(array_merge($data, ['password' => $pass]));
+
+        return $this->login($request);
     }
 
     /**
@@ -27,7 +45,7 @@ class AuthController extends Controller
         $credentials = request(['email', 'password']);
 
         if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['error' => "User doesn't exist or password is incorrect"], 401);
         }
 
         return $this->respondWithToken($token);
