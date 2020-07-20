@@ -14,4 +14,7 @@ Route::group([
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
 
+    Route::get('pokemon', 'PokemonController@index');
+    Route::post('pokemon', 'PokemonController@store');
+    Route::delete('pokemon/{pokemon}', 'PokemonController@delete');
 });
